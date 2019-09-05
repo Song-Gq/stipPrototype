@@ -8,21 +8,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RvAdapter extends RecyclerView.Adapter<RvAdapter.TvHolder> {
 
     private final LayoutInflater mLayoutInflater;
     private final Context mContext;
-    private final ArrayList<String> mData;
+    private List<Device> mData;
 
-    public RvAdapter(Context context) {
+    public RvAdapter(Context context, List<Device> devices) {
         mLayoutInflater = LayoutInflater.from(context);
         mContext = context;
-
-        mData = new ArrayList<>();
-        for (int i = 0; i < 40; i++) {
-            mData.add("hello " + i);
-        }
+        mData = devices;
     }
 
     @Override
@@ -32,7 +29,7 @@ public class RvAdapter extends RecyclerView.Adapter<RvAdapter.TvHolder> {
 
     @Override
     public void onBindViewHolder(final RvAdapter.TvHolder holder, int pos) {
-        holder.mTextView.setText(mData.get(pos));
+        holder.mTextView.setText(mData.get(pos).getName());
     }
 
     @Override

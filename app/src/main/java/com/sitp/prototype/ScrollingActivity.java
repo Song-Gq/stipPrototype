@@ -1,5 +1,7 @@
 package com.sitp.prototype;
 
+import android.content.SharedPreferences;
+import android.graphics.ImageDecoder;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -7,11 +9,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScrollingActivity extends AppCompatActivity {
+
+    private List<Device> devices = new ArrayList<>();
+    public static final String PREFS_NAME = "PrefsFile";
+    private RvAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +39,9 @@ public class ScrollingActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                addDevice(2, "balcony window", 1);
+                // adapter.refreshData(devices);
+                adapter.notifyDataSetChanged();
                 Snackbar.make(view, "Voice Recognition to be Added.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -34,9 +52,13 @@ public class ScrollingActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(linearLayoutManager);
 
-        RvAdapter adapter = new RvAdapter(this);
+        // addDevice(1, "bedroom ac", 2);
+        // addDevice(0, "main kitchen", 0);
+        // addDevice(2, "balcony window", 1);
+        getDevices();
+        adapter = new RvAdapter(this, devices);
         rv.setAdapter(adapter);
-        
+
     }
 
     @Override
@@ -58,5 +80,57 @@ public class ScrollingActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // get devices from local data
+    private boolean getDevices()
+    {
+        SharedPreferences sharedPreferences=getSharedPreferences(PREFS_NAME, 0);
+        String temp = sharedPreferences.getString("deviceList", "");
+        ByteArrayInputStream bais =  new ByteArrayInputStream(Base64.decode(temp.getBytes(), Base64.DEFAULT));
+        try {
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            devices = (List<Device>)ois.readObject();
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+        catch(ClassNotFoundException e1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean addDevice(int model, String name, int status)
+    {
+        try
+        {
+            Device device = new Device(model, name, status);
+            devices.add(device);
+
+            SharedPreferences deviceList = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = deviceList.edit();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(devices);//把对象写到流里
+                String temp = new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT));
+                editor.putString("deviceList", temp);
+                editor.commit();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            return true;
+        }
+        catch (Exception e) {
+            // construction fails
+            return false;
+        }
     }
 }
