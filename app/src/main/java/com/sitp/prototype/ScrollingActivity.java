@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.List;
 
 public class ScrollingActivity extends AppCompatActivity {
@@ -35,18 +36,38 @@ public class ScrollingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        initFab();
+        initRv();
+    }
+
+    private void initFab()
+    {
+        // speak button
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_speak);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addDevice(2, "balcony window", 1);
-                // adapter.refreshData(devices);
-                adapter.notifyDataSetChanged();
                 Snackbar.make(view, "Voice Recognition to be Added.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
 
+        // add button
+        FloatingActionButton fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
+        fab_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addDevice(2, "balcony window", 1);
+                // refresh data in adapter
+                adapter.notifyDataSetChanged();
+                Snackbar.make(view, "Default Device Added.", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+    }
+
+    private void initRv()
+    {
         // init recycler view
         RecyclerView rv = findViewById(R.id.rv_id);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -59,6 +80,14 @@ public class ScrollingActivity extends AppCompatActivity {
         adapter = new RvAdapter(this, devices);
         rv.setAdapter(adapter);
 
+        adapter.setRvListener(new RvAdapter.RvListener() {
+            @Override
+            public void onItemClicked(int position) {
+                // open dialog
+                Snackbar.make(findViewById(R.id.app_bar), "Item Clicked.", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
     }
 
     @Override
@@ -133,4 +162,5 @@ public class ScrollingActivity extends AppCompatActivity {
             return false;
         }
     }
+
 }
