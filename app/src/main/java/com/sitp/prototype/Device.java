@@ -28,6 +28,8 @@ public class Device implements Serializable {
 
     private static String[] _modelName = {"Stove", "Air Conditioner",
     "Window", "Door", "Unknown Device", "Erroneous Device"};
+    private static String[] _statusName = {"Off", "On", "Connection Fails",
+    "Device Abnormal", "Unknown Issue", "Erroneous Status"};
 
     public Device(int model, String name, int status) throws Exception
     {
@@ -72,6 +74,7 @@ public class Device implements Serializable {
     public String getName() { return _name; }
     public int getModel() { return _model; }
     public String getModelName() { return _modelName[_model]; }
+    public String getStatusName() { return _statusName[_status]; }
     public int getStatus() { return _status; }
 
     public int getMinModel() { return _modelRange[0]; }

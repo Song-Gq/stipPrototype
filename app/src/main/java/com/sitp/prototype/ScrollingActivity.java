@@ -5,6 +5,7 @@ import android.graphics.ImageDecoder;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,7 +24,8 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 
-public class ScrollingActivity extends AppCompatActivity {
+public class ScrollingActivity extends AppCompatActivity
+    implements EventListener, DeviceDialog.DeviceDialogListener {
 
     private List<Device> devices = new ArrayList<>();
     public static final String PREFS_NAME = "PrefsFile";
@@ -58,8 +60,7 @@ public class ScrollingActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 addDevice(2, "balcony window", 1);
-                // refresh data in adapter
-                adapter.notifyDataSetChanged();
+
                 Snackbar.make(view, "Default Device Added.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -84,8 +85,11 @@ public class ScrollingActivity extends AppCompatActivity {
             @Override
             public void onItemClicked(int position) {
                 // open dialog
-                Snackbar.make(findViewById(R.id.app_bar), "Item Clicked.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                DialogFragment newFragment = new DeviceDialog();
+                Bundle args = new Bundle();
+                args.putInt("devicePosition", position);
+                newFragment.setArguments(args);
+                newFragment.show(getSupportFragmentManager(), "device_dialog");
             }
         });
     }
@@ -149,18 +153,38 @@ public class ScrollingActivity extends AppCompatActivity {
                 String temp = new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT));
                 editor.putString("deviceList", temp);
                 editor.commit();
+
+                // refresh data in adapter
+                adapter.notifyDataSetChanged();
+                return true;
             }
             catch (IOException e)
             {
                 e.printStackTrace();
+                return false;
             }
-
-            return true;
         }
         catch (Exception e) {
             // construction fails
             return false;
         }
+    }
+
+    @Override
+    public void onDialogPositiveClick(DeviceDialog dialog)
+    {
+        // refresh data
+        initRv();
+
+        Snackbar.make(findViewById(R.id.app_bar), "Device Name Saved.", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    @Override
+    public void onDialogNegativeClick(DeviceDialog dialog)
+    {
+        Snackbar.make(findViewById(R.id.app_bar), "Device Name Not Saved.", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 
 }

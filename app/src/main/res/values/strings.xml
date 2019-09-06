@@ -1,8 +1,14 @@
 <resources>
     <string name="app_name">Prototype</string>
     <string name="title">"Press to Speak"</string>
-    <string name="large_text">
-        "Here is the list of IoT devices.\n\n"
-    </string>
+    <string name="status_title">Device Status</string>
+    <string name="status_content">Loading</string>
+    <string name="model_title">Device Model</string>
+    <string name="model_content">Loading</string>
+    <string name="device_name_title">Device Name</string>
+    <string name="device_name_field">Your Decive Name</string>
+    <string name="device_dialog_title">Device Info</string>
+    <string name="confirm_button_text">Save</string>
+    <string name="cancel_button_text">Cancel</string>
     <string name="action_settings">Settings</string>
 </resources>
