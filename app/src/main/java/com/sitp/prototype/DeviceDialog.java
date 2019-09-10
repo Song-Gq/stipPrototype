@@ -71,6 +71,12 @@ public class DeviceDialog extends DialogFragment {
                         // Send the negative button event back to the host activity
                         mListener.onDialogNegativeClick(DeviceDialog.this);
                     }
+                })
+                .setNeutralButton(R.string.delete_button_text, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mListener.onDialogNeutralClick(DeviceDialog.this, devicePosition);
+                    }
                 });
         // Create the AlertDialog object and return it
         return builder.create();
@@ -82,6 +88,7 @@ public class DeviceDialog extends DialogFragment {
     public interface DeviceDialogListener {
         public void onDialogPositiveClick(DeviceDialog dialog);
         public void onDialogNegativeClick(DeviceDialog dialog);
+        public void onDialogNeutralClick(DeviceDialog dialog, int position);
     }
 
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener

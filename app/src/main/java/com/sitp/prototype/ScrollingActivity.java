@@ -25,7 +25,8 @@ import java.util.EventListener;
 import java.util.List;
 
 public class ScrollingActivity extends AppCompatActivity
-    implements EventListener, DeviceDialog.DeviceDialogListener {
+    implements EventListener, DeviceDialog.DeviceDialogListener,
+    AddDialog.AddDialogListener {
 
     private List<Device> devices = new ArrayList<>();
     public static final String PREFS_NAME = "PrefsFile";
@@ -59,10 +60,9 @@ public class ScrollingActivity extends AppCompatActivity
         fab_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addDevice(2, "balcony window", 1);
-
-                Snackbar.make(view, "Default Device Added.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // open dialog
+                DialogFragment newFragment = new AddDialog();
+                newFragment.show(getSupportFragmentManager(), "add_dialog");
             }
         });
     }
@@ -170,6 +170,38 @@ public class ScrollingActivity extends AppCompatActivity
         }
     }
 
+    private boolean deleteDevice(int position)
+    {
+        try
+        {
+            devices.remove(position);
+
+            SharedPreferences deviceList = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = deviceList.edit();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(devices);//把对象写到流里
+                String temp = new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT));
+                editor.putString("deviceList", temp);
+                editor.commit();
+
+                // refresh data in adapter
+                adapter.notifyDataSetChanged();
+                return true;
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        catch (Exception e) {
+            // construction fails
+            return false;
+        }
+    }
+
     @Override
     public void onDialogPositiveClick(DeviceDialog dialog)
     {
@@ -187,4 +219,27 @@ public class ScrollingActivity extends AppCompatActivity
                 .setAction("Action", null).show();
     }
 
+    @Override
+    public void onDialogNeutralClick(DeviceDialog dialog, int position)
+    {
+        deleteDevice(position);
+        Snackbar.make(findViewById(R.id.app_bar), "Device Deleted.", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    @Override
+    public void onAddDialogPositiveClick(AddDialog dialog, int model)
+    {
+        addDevice(model, "", 1);
+
+        Snackbar.make(findViewById(R.id.app_bar), "New Device Added.", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    @Override
+    public void onAddDialogNegativeClick(AddDialog dialog)
+    {
+        Snackbar.make(findViewById(R.id.app_bar), "Device Not Added.", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
 }
